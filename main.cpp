@@ -36,20 +36,49 @@ int main()
 
 	std::cout << vec << "\n";
 
-	myQueue<int> que{ 1,5, 7,9,3 };
+	myQueue<int> que;// { 1, 5, 7, 9, 3 };
 	std::cout << "Function method print\n";
 	que.print("que");
 	std::cout << "Function method <<\n";
 	std::cout << que;
 
 	que.push(5);
+	que.push(4);
+	que.push(3);
+	que.push(2);
+	que.push(1);
 
-	std::cout << que;
 	std::cout << "range based for\n";
-	for (auto i : que)
+
+	for (const auto& i : que)
 	{
 		std::cout << i << " ";
 	}
+
+
+
+	myQueue<int>::iterator itb = que.begin();
+	myQueue<int>::iterator ite = que.end();
+
+	if (itb == ite)
+	{
+		std::cout << " All right!";
+	}
+
+	std::cout << *ite;
+	//std::cout << it;
+	std::cout << *itb;
+	++itb;
+	std::cout << *itb;
+	++itb;
+	std::cout << *itb;
+	++itb;
+	std::cout << *itb;
+	++itb;
+	std::cout << *itb;
+
+	std::cout << "Function method <<\n";
+	std::cout << que;
 
 	return 0;
 }

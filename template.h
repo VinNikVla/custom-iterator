@@ -91,91 +91,77 @@ public:
 	class iterator
 	{
 	public:
-		iterator(T* ptr) :ptr(ptr) {};
-		iterator operator++() { ++ptr; return *this; }
-		bool operator != (const iterator& other) { return ptr != other.ptr; }
-		const T& operator*() const { return *ptr; }
+		iterator(myQueue* ptr, unsigned int index) :ptrQueue(ptr), ind(index) {};
+		iterator& operator++() { ind++;ind %= ptrQueue->cap; return (*this); }
+		bool operator != (const iterator& other) const { return !((ptrQueue->p == other.ptrQueue->p) && (ind == other.ind)); }
+		bool operator == (const iterator& other) const { return ((ptrQueue->p == other.ptrQueue->p) && (ind == other.ind));}
+		const T& operator*() const { return ptrQueue->p[ind]; }//только для чтения
+		T& operator*() {return ptrQueue->p[ind];}//для чтения и записи вроде как
+
 	private:
-		T* ptr;
+		myQueue* ptrQueue;
+		unsigned int ind;
+
 	};
 private:
-	T* p;//динамический массив
 	unsigned int cnt;//размер очереди
 	unsigned int cap;//емкость очереди
-	unsigned int frst;//первый элемент
-	unsigned int lst;//последний элемент
+	unsigned int head;//первый элемент
+	unsigned int tail;//последний элемент
+	T* p;//динамический массив
 public:
-	myQueue() = default;
-	myQueue(const myQueue& other)
+	myQueue() :cap(10), cnt(0), head(0), tail(0), p(new T[cap]) { }
+	myQueue(const myQueue& other):cap(other.cnt + 10),cnt(other.cnt), head(0), tail(cnt), p(new T[cap])
 	{
-		cap = other.cap;
 
-		try {
-			p = new T[cap];
-			for (int i = 0; i < cap; i++)
+
+		auto itb = other.begin();
+			
+			for (int i = 0; i < cnt; i++)
 			{
-				p[i] = other.p[i];
-				cnt++;
+				p[i] = *itb;
+				++itb;
 			}
-		}
-		catch (std::bad_alloc e)
-		{
-			std::cout << e.what() << std::endl;
-			cnt = 0;
-		}
+
+
 	}
 	void push(const T& item)
 	{
-		T* p2;//дополнительный указатель
-		p2 = p;//перенаправил дополнительный указатель на p
-
-		if (cnt == cap)
+		
+		if (cnt == cap - 1)
 		{
-			cap++;
-			p = new T[cnt + 1];
-		}
-		try 
-		{
-			//попытка выделения памяти для p
-			
+			//перераспределение памяти
 
-			for (int i = 0; i < cnt; i++)
-			{
-				p[i] = p2[i];
-			}
-			
-			p[cnt] = item;//скопировали последний элементы
-			cnt++;
-			//увеличили число элементов
-			//освободили предварительно выделенную память
-			if (cnt > 1)
-			{
-				delete[] p2;
-			}
 		}
-		catch(std::bad_alloc e)
-		{
-			//если память не выделена 
-			std::cout << e.what() << std::endl;// вывести сообщение об ошибке
-
-			//вернуть указатель
-			p = p2;
-		}
+		p[tail] = item;
+		cnt++;
+		tail = (tail + 1) % cap;
+		
 	}
-	myQueue(const std::initializer_list<T>& init)
+	//move operATOR
+
+
+	T pop()
 	{
-		cap = init.size();
-		p = new T[cap];
+		//ПЕРЕМЕЩАЮЩИЙ КОНСТРУКТОР
+
+		T tmp{ std::move(p[head]) };
+		head = (head +1 ) % cap;
+		cnt--;
+		return tmp;
+	}
+	myQueue(const std::initializer_list<T>& init):cap(init.size()*2), cnt(init.size()), head(0), tail(0), p(new T[cap])
+	{
+
 		for (const auto& i : init)
 		{
-			p[cnt] = i;
-			cnt++;
+			p[tail] = i;
+			tail++;
 		}
 	}
 
 	~myQueue()
 	{
-		if (cnt > 0)
 			delete[] p;
 	}
 
@@ -191,6 +177,7 @@ public:
 
 	friend std::ostream& operator << (std::ostream& out, const myQueue<T>& queue)
 	{
+		out << "Capacity: " << queue.cap << " " << "Size: " << queue.cnt << std::endl;
 		for (int i = 0; i < queue.cnt; i++)
 		{
 			out << queue.p[i] << " ";
@@ -198,7 +185,11 @@ public:
 		out << std::endl;
 		return out;
 	}
-	iterator begin() const { return iterator(p); }
-	iterator end() const { return iterator(p + cnt); }
+
+	//оператора присваивания класический
+	//оператор присваивания move
+	//сравнение на равенство
+	iterator begin() { return iterator(this, head); }
+	iterator end() { return iterator(this, tail); }
 
 };
