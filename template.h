@@ -345,9 +345,9 @@ class myUniquePtr
 {
 public:
 	//конструктор
-	myUniquePtr(T* ptr)
+	myUniquePtr(T* ptr):m_ptr(ptr)
 	{
-		this->m_ptr = ptr;
+		//this->m_ptr = ptr;
 		std::cout << "Constructor\n";
 	}
 	//деструктор
@@ -356,11 +356,54 @@ public:
 		delete m_ptr;
 		std::cout << "Destructor\n";
 	}
+
+	//вроде как запрет на использование классического конструктора копирования
+	myUniquePtr(const myUniquePtr&) = delete;
+
+	
+	//move конструктор копирования
+	myUniquePtr(myUniquePtr&& other) :m_ptr(std::move(other.m_ptr))
+	{
+		other.m_ptr = nullptr;
+	}
+
+	//вроде как запрет на использование классического оператора присваивания
+	myUniquePtr<T>& operator=(const myUniquePtr& other) = delete;
+
+	//move оператор присваивания
+	myUniquePtr<T>& operator=(myUniquePtr&& other)
+	{
+		delete m_ptr;
+		m_ptr = other.m_ptr;
+		other.m_ptr = nullptr;
+		return *this;
+	}
+
 	//оператор разыменования
 	T& operator *()
 	{
 		return *m_ptr;
 	}
+	//overload operator ->
+	T* operator->() const
+	{
+		return m_ptr;
+	}
+
+	
+
+	bool operator !=(const myUniquePtr& other)
+	{
+		return m_ptr != other.m_ptr;
+	}
+
+	operator bool() { return m_ptr != nullptr; }
+
+	
+	//T& operator->() const
+	//{
+	//	return *m_ptr;
+	//}
 
 private:
 	T* m_ptr;

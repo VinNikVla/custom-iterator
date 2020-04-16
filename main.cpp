@@ -2,6 +2,7 @@
 #include "template.h"	
 #include <queue>
 #include "MyString.h"
+#include <vector>
 int main()
 {
 	setlocale(LC_ALL, "Russian");
@@ -202,10 +203,42 @@ int main()
 	myUniquePtr<int> ptr1(new int(5));
 
 	MyString s("abc");
-	std::cout << s.GetString();
+	std::cout << s.GetString() << std::endl;
 	myUniquePtr<MyString> ptrStr(new MyString("abc"));
 std: cout << *ptrStr;
-	//std::cout << ptrStr->GetString();
+	std::cout << ptrStr->GetString() << std::endl;
+
+	ptrStr->SetNewString("qwerty");
+
+	std::cout << ptrStr->GetString() << std::endl;
+
+	MyString s2 = *ptrStr;
+
+	std::cout << s2 << std:: endl;
+
+	myUniquePtr<MyString> p2(move(ptrStr));
+
+	std::cout << *p2 << std::endl;
+
+	std::cout << ptrStr << std::endl;
+
+	if (ptrStr)
+	{
+		std::cout << "No object!" << std::endl;
+	}
+	
+	myUniquePtr<MyString> p3(new MyString("gggg"));
+
+	//p3 = p2;
+
+	std::vector<myUniquePtr<MyString>> vecPtr{ move(new MyString("aaa")), move(new MyString("bbb")) };//{ std::move(myUniquePtr<MyString("aaa")>), std::move(myUniquePtr < MyString("bbb")>) };
+	vecPtr.push_back(new MyString("abc"));
+	for (const auto& i : vecPtr)
+	{
+		std::cout << i->GetString();
+	}
+	
+
 	std::cout << "\n--------------------End of Third example---------------\n";
 	}
 	
